@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#ff4d8d">
+<title>Will You Go on a Date With Me? 💖</title>
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Poppins:wght@300;400;500;600&family=Hind+Siliguri:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- =====================================================
+     ⚙️ SETTINGS — EDIT ONLY THIS BLOCK
+     ===================================================== -->
+<script>
+const CONFIG = {
+  HER_NAME: "Rimi",        // her name shown in the greeting
+  NO_DODGES: 3,            // NO button dodges this many times, then stays still and lets her say no kindly
+  YOUR_NAME: "",           // e.g. "Rahim" (shown as "— Rahim" at the end)
+  DEFAULT_LANG: "en",      // "en" or "bn"
+
+  // ---- HOW YOU GET HER ANSWERS (use one, two or all three) ----
+  WEB3FORMS_KEY: "",       // Email  → free key from https://web3forms.com
+  TELEGRAM_BOT_TOKEN: "",  // Instant phone alert → create bot with @BotFather
+  TELEGRAM_CHAT_ID: "",    // your chat id → message @userinfobot to get it
+  WHATSAPP_NUMBER: "",     // backup button, e.g. "8801XXXXXXXXX"
+
+  NOTIFY_ON_OPEN: false,   // alert you when she opens the link
+  NOTIFY_ON_YES: true,     // alert you when she clicks YES
+
+  // ---- OPTIONAL EXTRAS ----
+  MUSIC_URL: "",           // e.g. "song.mp3" placed next to index.html (plays after she taps YES)
+  PHOTOS: [],              // e.g. ["us1.jpg","us2.jpg"] placed next to index.html
+  PERSONAL_NOTE: ""        // your own line shown on the final page (empty = default message)
+};
+</script>
+
+<style>
+:root{--pink:#ff4d8d;--rose:#c9356e;--text:#5a2340;--glass:rgba(255,255,255,.55);--shadow:0 20px 50px rgba(255,77,141,.25)}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{
+  font-family:'Poppins','Hind Siliguri',sans-serif;color:var(--text);overflow-x:hidden;min-height:100vh;
+  background:linear-gradient(135deg,#ffe3ee,#ffd1e3 40%,#ffeaf3 70%,#fff5f9);background-size:300% 300%;animation:bg 14s ease infinite;
+}
+body.bn{font-family:'Hind Siliguri','Poppins',sans-serif}
+@keyframes bg{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+#bg-layer,#fx-layer{position:fixed;inset:0;pointer-events:none;overflow:hidden}
+#bg-layer{z-index:0}#fx-layer{z-index:90}
+.float{position:absolute;bottom:-60px;opacity:.7;animation:rise linear infinite;user-select:none}
+@keyframes rise{to{transform:translateY(-115vh) rotate(40deg);opacity:0}}
+.fall{position:absolute;top:-50px;animation:fall linear forwards;user-select:none}
+@keyframes fall{to{transform:translateY(112vh) rotate(360deg)}}
+.confetti{position:absolute;top:-20px;width:9px;height:14px;animation:fall linear forwards}
+.trail{position:absolute;font-size:14px;animation:trail .9s ease-out forwards;pointer-events:none}
+@keyframes trail{to{transform:translateY(-40px) scale(.3);opacity:0}}
+
+/* top bar */
+#topbar{position:fixed;top:12px;right:12px;z-index:100;display:flex;gap:8px}
+.pill{border:none;cursor:pointer;background:rgba(255,255,255,.85);color:var(--rose);font:600 .85rem inherit;font-family:inherit;padding:8px 14px;border-radius:999px;box-shadow:0 4px 12px rgba(0,0,0,.08)}
+#music{display:none}
+#dots{position:fixed;top:18px;left:50%;transform:translateX(-50%);z-index:100;display:flex;gap:8px}
+#dots i{width:10px;height:10px;border-radius:50%;background:#fff;opacity:.6;transition:all .3s}
+#dots i.on{background:var(--pink);opacity:1;transform:scale(1.35)}
+
+main{position:relative;z-index:2;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:60px 18px 30px}
+.page{display:none;width:100%;max-width:560px;text-align:center}
+.page.active{display:block;animation:pop .6s cubic-bezier(.2,.9,.3,1.2)}
+.page.leave{display:block;animation:out .35s ease forwards}
+@keyframes pop{from{opacity:0;transform:translateY(30px) scale(.94)}to{opacity:1;transform:none}}
+@keyframes out{to{opacity:0;transform:translateY(-20px) scale(.96)}}
+.card{background:var(--glass);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1.5px solid rgba(255,255,255,.8);border-radius:32px;padding:32px 22px;box-shadow:var(--shadow)}
+h1{font-family:'Dancing Script','Hind Siliguri',cursive;font-size:clamp(2.2rem,8vw,3.2rem);color:var(--rose);line-height:1.2;margin-bottom:8px}
+h2{font-family:'Dancing Script','Hind Siliguri',cursive;font-size:clamp(1.8rem,7vw,2.5rem);color:var(--rose);line-height:1.25;margin-bottom:6px}
+body.bn h1,body.bn h2{font-family:'Hind Siliguri',sans-serif;font-weight:600}
+.sub{font-weight:300;font-size:1.02rem;margin-bottom:20px}
+.big{font-size:clamp(1.2rem,4.5vw,1.5rem);font-weight:500;margin:6px 0 26px}
+.hero-heart{font-size:4.2rem;display:inline-block;animation:beat 1.2s infinite}
+@keyframes beat{0%,100%{transform:scale(1)}15%{transform:scale(1.25)}30%{transform:scale(1)}45%{transform:scale(1.18)}}
+
+.btn{border:none;cursor:pointer;font-family:inherit;font-weight:600;border-radius:999px;padding:14px 32px;font-size:1.05rem;transition:transform .2s,box-shadow .2s;touch-action:manipulation}
+.btn-yes,.btn-next{color:#fff;background:linear-gradient(135deg,var(--pink),#ff7aa8);box-shadow:0 10px 25px rgba(255,77,141,.45)}
+.btn-yes{font-size:1.3rem;padding:16px 42px;animation:beat 1.6s infinite;position:relative;z-index:5;transition:transform .3s}
+.btn-yes:hover,.btn-next:hover{transform:scale(1.07)}
+.btn-yes:active,.btn-next:active{transform:scale(.95)}
+.btn-no{background:#fff;color:#8a5a70;box-shadow:0 6px 16px rgba(0,0,0,.1);z-index:95;white-space:nowrap}
+.btn-back{background:rgba(255,255,255,.85);color:var(--rose);margin-right:10px}
+.btn-ghost{background:rgba(255,255,255,.9);color:var(--rose);box-shadow:0 4px 12px rgba(0,0,0,.08);font-size:.92rem;padding:10px 20px;margin:6px 4px}
+.row{display:flex;gap:16px;justify-content:center;align-items:center;flex-wrap:wrap;min-height:76px}
+#noBtn.run{position:fixed}
+.hint{font-size:.85rem;opacity:.75;margin-top:6px;min-height:20px}
+
+label.t{display:block;text-align:left;font-weight:600;margin:16px 0 8px;color:var(--rose)}
+input[type=date],input[type=time],textarea{width:100%;padding:13px 15px;border-radius:18px;border:2px solid #ffc6dc;background:rgba(255,255,255,.92);font:inherit;color:var(--text);outline:none;transition:border .2s,box-shadow .2s}
+input:focus,textarea:focus{border-color:var(--pink);box-shadow:0 0 0 4px rgba(255,77,141,.15)}
+textarea{resize:none;height:80px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.chips{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.chip{padding:13px 8px;border-radius:18px;background:rgba(255,255,255,.88);border:2px solid #ffd3e3;cursor:pointer;font-weight:500;font-size:.95rem;transition:all .2s;user-select:none}
+.chip:hover{transform:translateY(-3px)}
+.chip.sel{background:linear-gradient(135deg,var(--pink),#ff7aa8);color:#fff;border-color:transparent;box-shadow:0 8px 18px rgba(255,77,141,.4);transform:scale(1.04)}
+.chips.three .chip:last-child:nth-child(odd){grid-column:1/-1}
+.meter{display:flex;align-items:center;gap:12px}
+.meter input{flex:1;accent-color:var(--pink)}
+.meter span{font-size:2rem;min-width:40px;transition:transform .2s}
+.foods{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:12px}
+.food{padding:14px 6px;border-radius:22px;background:rgba(255,255,255,.9);border:2px solid #ffd3e3;cursor:pointer;font-weight:500;transition:all .2s;user-select:none;position:relative}
+.food .e{font-size:2.2rem;display:block;margin-bottom:2px;transition:transform .3s}
+.food:hover .e{transform:scale(1.2) rotate(-8deg)}
+.food.sel{background:linear-gradient(135deg,#ffb3cf,#ff85b3);color:#fff;border-color:#fff;box-shadow:0 8px 18px rgba(255,77,141,.4)}
+.food.sel::after{content:"💖";position:absolute;top:-8px;right:-4px;font-size:1.2rem;animation:beat 1s infinite}
+.err{color:#d6204f;font-size:.88rem;min-height:20px;margin-top:10px}
+.nav{margin-top:18px;display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:8px}
+
+.summary{background:rgba(255,255,255,.78);border-radius:24px;padding:18px;margin:18px 0;text-align:left;border:2px dashed #ff9fc2}
+.summary h3{font-family:'Dancing Script','Hind Siliguri',cursive;font-size:1.8rem;text-align:center;color:var(--rose);margin-bottom:8px}
+.summary p{margin:7px 0;font-size:.98rem}
+#countdown{display:flex;gap:8px;justify-content:center;margin:14px 0}
+#countdown div{background:rgba(255,255,255,.85);border-radius:16px;padding:10px 6px;min-width:64px;box-shadow:0 6px 14px rgba(255,77,141,.15)}
+#countdown b{display:block;font-size:1.5rem;color:var(--pink)}
+#countdown small{font-size:.7rem;opacity:.75}
+.cdtitle{font-weight:500;margin-top:8px}
+.msg{font-style:italic;font-weight:300;line-height:1.75;margin:14px 0;min-height:110px}
+body.bn .msg{font-style:normal}
+.final{font-family:'Dancing Script','Hind Siliguri',cursive;font-size:2rem;color:var(--rose);margin-top:4px}
+body.bn .final{font-family:'Hind Siliguri',sans-serif;font-size:1.6rem;font-weight:600}
+.from{font-weight:500;margin-top:4px}
+.status{font-size:.82rem;opacity:.75;margin-top:12px;min-height:18px}
+.wa{display:inline-block;margin-top:10px;text-decoration:none;background:#25d366;color:#fff;padding:10px 22px;border-radius:999px;font-weight:600;font-size:.95rem}
+#gallery{display:none;margin:14px auto;position:relative;width:200px;height:230px}
+#gallery img{position:absolute;inset:0;width:100%;height:190px;object-fit:cover;border:8px solid #fff;border-bottom-width:30px;border-radius:6px;box-shadow:0 10px 24px rgba(0,0,0,.2);opacity:0;transform:rotate(-4deg) scale(.9);transition:all .8s}
+#gallery img.on{opacity:1;transform:rotate(3deg) scale(1)}
+</style>
+</head>
+<body>
+<div id="bg-layer"></div>
+<div id="fx-layer"></div>
+
+<div id="topbar">
+  <button class="pill" id="music" aria-label="music">🎵</button>
+  <button class="pill" id="langBtn">বাংলা</button>
+</div>
+<div id="dots"><i class="on"></i><i></i><i></i><i></i></div>
+
+<main>
+  <!-- PAGE 1 -->
+  <section class="page active" id="p1">
+    <div class="card">
+      <div class="hero-heart">💖</div>
+      <h1 id="hey"></h1>
+      <p class="sub" data-i="p1sub"></p>
+      <p class="big" data-i="p1q"></p>
+      <div class="row" id="btnRow">
+        <button class="btn btn-yes" id="yesBtn" data-i="yes"></button>
+        <button class="btn btn-no" id="noBtn" data-i="no"></button>
+      </div>
+      <p class="hint" id="noHint"></p>
+      <p class="big" id="declineBox" style="display:none;margin:10px 0 0"></p>
+    </div>
+  </section>
+
+  <!-- PAGE 2 -->
+  <section class="page" id="p2">
+    <div class="card">
+      <h2 data-i="p2h"></h2>
+      <p class="sub" data-i="p2sub"></p>
+
+      <label class="t" for="dateInput" data-i="chooseDate"></label>
+      <input type="date" id="dateInput">
+
+      <label class="t" data-i="chooseTime"></label>
+      <div class="chips" id="timeChips">
+        <div class="chip" data-v="Morning ☀️" data-i="morning"></div>
+        <div class="chip" data-v="Afternoon 🌸" data-i="afternoon"></div>
+        <div class="chip" data-v="Evening 🌙" data-i="evening"></div>
+        <div class="chip" data-v="Night ✨" data-i="night"></div>
+      </div>
+      <label class="t" for="exactTime" data-i="exact"></label>
+      <input type="time" id="exactTime">
+
+      <label class="t" data-i="choosePlace"></label>
+      <div class="chips three" id="placeChips">
+        <div class="chip" data-v="Coffee Shop ☕" data-i="coffeeshop"></div>
+        <div class="chip" data-v="Restaurant 🍽️" data-i="restaurant"></div>
+        <div class="chip" data-v="Park 🌳" data-i="park"></div>
+        <div class="chip" data-v="Shopping Mall 🛍️" data-i="mall"></div>
+        <div class="chip" data-v="Surprise me 😄" data-i="special"></div>
+      </div>
+
+      <label class="t" data-i="excited"></label>
+      <div class="meter"><input type="range" id="meter" min="1" max="10" value="7"><span id="meterE">😊</span></div>
+
+      <div class="err" id="err2"></div>
+      <div class="nav">
+        <button class="btn btn-back" id="back2" data-i="back"></button>
+        <button class="btn btn-next" id="next2" data-i="next"></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- PAGE 3 -->
+  <section class="page" id="p3">
+    <div class="card">
+      <h2 data-i="p3h"></h2>
+      <p class="sub" data-i="p3sub"></p>
+      <div class="foods" id="foods"></div>
+      <textarea id="extra" data-iph="extraPh"></textarea>
+      <div class="err" id="err3"></div>
+      <div class="nav">
+        <button class="btn btn-back" id="back3" data-i="back"></button>
+        <button class="btn btn-next" id="next3" data-i="official"></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- PAGE 4 -->
+  <section class="page" id="p4">
+    <div class="card">
+      <h1 data-i="p4h"></h1>
+      <p class="sub" data-i="p4sub"></p>
+      <div id="gallery"></div>
+      <div class="summary">
+        <h3 data-i="plan"></h3>
+        <p>📅 <b data-i="lDate"></b> <span id="sDate"></span></p>
+        <p>⏰ <b data-i="lTime"></b> <span id="sTime"></span></p>
+        <p>📍 <b data-i="lPlace"></b> <span id="sPlace"></span></p>
+        <p>🍕 <b data-i="lFood"></b> <span id="sFood"></span></p>
+        <p id="sExtraWrap" style="display:none">💗 <b data-i="lExtra"></b> <span id="sExtra"></span></p>
+      </div>
+      <p class="cdtitle" data-i="countdown"></p>
+      <div id="countdown">
+        <div><b id="cD">0</b><small data-i="days"></small></div>
+        <div><b id="cH">0</b><small data-i="hours"></small></div>
+        <div><b id="cM">0</b><small data-i="mins"></small></div>
+        <div><b id="cS">0</b><small data-i="secs"></small></div>
+      </div>
+      <p class="msg" id="typed"></p>
+      <p class="final" data-i="see"></p>
+      <p class="from" id="from"></p>
+      <div style="margin-top:10px">
+        <button class="btn btn-ghost" id="calBtn" data-i="cal"></button>
+        <button class="btn btn-ghost" id="againBtn" data-i="again"></button>
+      </div>
+      <div class="status" id="status"></div>
+      <div id="waWrap"></div>
+    </div>
+  </section>
+</main>
+
+<script>
+/* ================= Translations ================= */
+const T={
+ en:{
+  hey:"Hey there! 😊",heyN:n=>`Hey ${n}! 😊`,p1sub:"I have a little question for you...",p1q:"Would you like to go on a date with me?",
+  yes:"YES! 💖",no:"NO 😢",
+  p2h:"Yay! You made my day! 🥹",p2sub:"Let's plan our little date together.",
+  chooseDate:"📅 Choose a date",chooseTime:"⏰ Choose a time",exact:"🕐 Exact time (optional)",choosePlace:"📍 Choose a place",
+  morning:"Morning ☀️",afternoon:"Afternoon 🌸",evening:"Evening 🌙",night:"Night ✨",
+  coffeeshop:"Coffee Shop ☕",restaurant:"Restaurant 🍽️",park:"Park 🌳",mall:"Shopping Mall 🛍️",special:"Surprise me 😄",
+  excited:"💓 How excited are you?",back:"← Back",next:"Next 💕",
+  p3h:"One More Important Question! 😋",p3sub:"What would you love to eat on our date?",extraPh:"Anything else you'd like? 💗",official:"Let's Make It Official ❤️",
+  p4h:"IT'S A DATE! 🎉",p4sub:"Thank you for saying YES!",plan:"Our Date Plan ☕",
+  lDate:"Date:",lTime:"Time:",lPlace:"Place:",lFood:"Food:",lExtra:"Extra:",
+  countdown:"⏳ Counting down to our date...",days:"days",hours:"hours",mins:"mins",secs:"secs",
+  msg:"I'm really glad you said yes. I don't know how perfect the day will be, but I'm looking forward to spending some good time with you. 😊",
+  see:"See you soon! 😊",cal:"📅 Add to my calendar",again:"🎉 Celebrate again",
+  errDate:"Please pick a date 📅",errTime:"Please pick a time ⏰",errPlace:"Please pick a place 📍",errFood:"Pick at least one yummy thing 😋",
+  noT:["NO 😢","Are you sure? 🥺","Pleaseee 🥹","Think again 💭","You can't catch me 😜","Just press YES 💖","Really?! 😭","Okay okay, YES? 🙈"],
+  noHint:n=>n<3?"":n<6?"Hmm, the NO button seems shy... 😏":"The YES button is getting bigger because it loves you 💖",
+  sending:"Sending your answers... 💌",sent:"Your answers have been delivered 💌",
+  wa:"💬 Send my choices on WhatsApp",
+  meter:["😐","🙂","🙂","😊","😊","😄","😄","🥰","😍","🤩"],
+  tm:{"Morning ☀️":"Morning","Afternoon 🌸":"Afternoon","Evening 🌙":"Evening","Night ✨":"Night"},
+  food:["Pizza","Burger","Coffee","Pasta","Ice Cream","Cake","Fried Chicken","Noodles","Bubble Tea","French Fries"],
+  langBtn:"বাংলা",noFinal:"No, sorry 🙏",decline:"No worries at all, thank you for being honest 💛 Hope we stay good friends!"
+ },
+ bn:{
+  hey:"হ্যালো! 😊",heyN:n=>`হ্যালো ${n}! 😊`,p1sub:"তোমাকে একটা ছোট্ট প্রশ্ন করার ছিল...",p1q:"তুমি কি আমার সাথে ডেটে যাবে?",
+  yes:"হ্যাঁ! 💖",no:"না 😢",
+  p2h:"ইয়ে! তুমি আমার দিনটা সুন্দর করে দিলে! 🥹",p2sub:"চলো আমাদের ছোট্ট ডেটটা একসাথে প্ল্যান করি।",
+  chooseDate:"📅 তারিখ বেছে নাও",chooseTime:"⏰ সময় বেছে নাও",exact:"🕐 নির্দিষ্ট সময় (ঐচ্ছিক)",choosePlace:"📍 জায়গা বেছে নাও",
+  morning:"সকাল ☀️",afternoon:"দুপুর/বিকাল 🌸",evening:"সন্ধ্যা 🌙",night:"রাত ✨",
+  coffeeshop:"কফি শপ ☕",restaurant:"রেস্টুরেন্ট 🍽️",park:"পার্ক 🌳",mall:"শপিং মল 🛍️",special:"সারপ্রাইজ দাও 😄",
+  excited:"💓 তুমি কতটা এক্সাইটেড?",back:"← পেছনে",next:"পরবর্তী 💕",
+  p3h:"আরও একটা জরুরি প্রশ্ন! 😋",p3sub:"আমাদের ডেটে তুমি কী খেতে চাও?",extraPh:"আর কিছু চাইলে লিখো 💗",official:"চলো ফাইনাল করি ❤️",
+  p4h:"ডেট ফাইনাল! 🎉",p4sub:"হ্যাঁ বলার জন্য ধন্যবাদ!",plan:"আমাদের ডেট প্ল্যান ☕",
+  lDate:"তারিখ:",lTime:"সময়:",lPlace:"জায়গা:",lFood:"খাবার:",lExtra:"অতিরিক্ত:",
+  countdown:"⏳ আমাদের ডেটের কাউন্টডাউন...",days:"দিন",hours:"ঘণ্টা",mins:"মিনিট",secs:"সেকেন্ড",
+  msg:"তুমি হ্যাঁ বলেছো বলে আমি সত্যিই খুশি। দিনটা কতটা perfect হবে জানি না, তবে তোমার সাথে কিছু ভালো সময় কাটানোর অপেক্ষায় আছি। 😊",
+  see:"শীঘ্রই দেখা হচ্ছে! 😊",cal:"📅 ক্যালেন্ডারে যোগ করো",again:"🎉 আবার সেলিব্রেট করো",
+  errDate:"একটা তারিখ বেছে নাও 📅",errTime:"একটা সময় বেছে নাও ⏰",errPlace:"একটা জায়গা বেছে নাও 📍",errFood:"অন্তত একটা খাবার বেছে নাও 😋",
+  noT:["না 😢","নিশ্চিত? 🥺","প্লিইইজ 🥹","আবার ভাবো 💭","ধরতে পারবে না 😜","শুধু হ্যাঁ চাপো 💖","সত্যিই?! 😭","ঠিক আছে, হ্যাঁ? 🙈"],
+  noHint:n=>n<3?"":n<6?"না বাটনটা মনে হয় লজ্জা পাচ্ছে... 😏":"হ্যাঁ বাটনটা বড় হচ্ছে কারণ সে তোমাকে ভালোবাসে 💖",
+  sending:"তোমার উত্তর পাঠানো হচ্ছে... 💌",sent:"তোমার উত্তর পৌঁছে গেছে 💌",
+  wa:"💬 হোয়াটসঅ্যাপে পাঠাও",
+  meter:["😐","🙂","🙂","😊","😊","😄","😄","🥰","😍","🤩"],
+  tm:{"Morning ☀️":"সকাল","Afternoon 🌸":"দুপুর/বিকাল","Evening 🌙":"সন্ধ্যা","Night ✨":"রাত"},
+  food:["পিৎজা","বার্গার","কফি","পাস্তা","আইসক্রিম","কেক","ফ্রাইড চিকেন","নুডলস","বাবল টি","ফ্রেঞ্চ ফ্রাইজ"],
+  langBtn:"English",noFinal:"না, দুঃখিত 🙏",decline:"কোনো সমস্যা নেই, সৎভাবে বলার জন্য ধন্যবাদ 💛 আশা করি আমরা ভালো বন্ধু থাকব!"
+ }
+};
+const FOODS=[["🍕","Pizza"],["🍔","Burger"],["☕","Coffee"],["🍝","Pasta"],["🍦","Ice Cream"],["🍰","Cake"],["🍗","Fried Chicken"],["🍜","Noodles"],["🧋","Bubble Tea"],["🍟","French Fries"]];
+
+/* ================= State ================= */
+const $=id=>document.getElementById(id);
+const state={date:"",time:"",exact:"",place:"",foods:[],extra:"",excitement:7,noClicks:0};
+let lang=CONFIG.DEFAULT_LANG==="bn"?"bn":"en";
+try{const s=localStorage.getItem("lang");if(s)lang=s}catch(e){}
+let current="p1",typedOnce=false,cdTimer=null;
+
+function applyLang(){
+  const L=T[lang];document.body.classList.toggle("bn",lang==="bn");document.documentElement.lang=lang;
+  document.querySelectorAll("[data-i]").forEach(el=>{const v=L[el.dataset.i];if(typeof v==="string")el.textContent=v});
+  document.querySelectorAll("[data-iph]").forEach(el=>el.placeholder=L[el.dataset.iph]);
+  $("hey").textContent=CONFIG.HER_NAME?L.heyN(CONFIG.HER_NAME):L.hey;
+  $("langBtn").textContent=L.langBtn;
+  if(!noBtn.classList.contains("moved"))noBtn.textContent=L.no;else noBtn.textContent=settled?L.noFinal:L.noT[state.noClicks%L.noT.length];
+  if($("declineBox").style.display==="block")$("declineBox").textContent=L.decline;
+  document.querySelectorAll(".food").forEach((f,i)=>f.querySelector(".t2").textContent=L.food[i]);
+  $("meterE").textContent=L.meter[$("meter").value-1];
+  $("from").textContent=CONFIG.YOUR_NAME?"— "+CONFIG.YOUR_NAME+" 💌":"";
+  if(current==="p4")fillSummary();
+}
+$("langBtn").onclick=()=>{lang=lang==="en"?"bn":"en";try{localStorage.setItem("lang",lang)}catch(e){}applyLang();if(current==="p4"){typedOnce=false;typeMsg()}};
+
+/* ================= Background / FX ================= */
+(function(){const it=["💗","🌸","✨","💕","🌷","💖","🌹"],L=$("bg-layer");
+ for(let i=0;i<22;i++){const s=document.createElement("span");s.className="float";s.textContent=it[i%it.length];
+  s.style.left=Math.random()*100+"vw";s.style.fontSize=(14+Math.random()*26)+"px";
+  s.style.animationDuration=(9+Math.random()*12)+"s";s.style.animationDelay=(-Math.random()*18)+"s";L.appendChild(s)}})();
+const fx=$("fx-layer");
+function rain(em,count,dur){for(let i=0;i<count;i++)setTimeout(()=>{const s=document.createElement("span");s.className="fall";
+  s.textContent=em[Math.floor(Math.random()*em.length)];s.style.left=Math.random()*100+"vw";s.style.fontSize=(18+Math.random()*26)+"px";
+  const d=3+Math.random()*3.5;s.style.animationDuration=d+"s";fx.appendChild(s);setTimeout(()=>s.remove(),d*1000+100)},Math.random()*dur)}
+function confetti(n){const c=["#ff4d8d","#ff85b3","#ffd166","#fff","#c9a0ff","#7fd8ff"];
+ for(let i=0;i<n;i++)setTimeout(()=>{const e=document.createElement("div");e.className="confetti";e.style.left=Math.random()*100+"vw";
+  e.style.background=c[i%c.length];const d=2.5+Math.random()*3;e.style.animationDuration=d+"s";e.style.borderRadius=Math.random()>.5?"50%":"2px";
+  fx.appendChild(e);setTimeout(()=>e.remove(),d*1000+100)},Math.random()*2500)}
+function burstAt(x,y){for(let i=0;i<14;i++){const h=document.createElement("span");h.textContent="💖";
+  h.style.cssText=`position:absolute;left:${x}px;top:${y}px;font-size:${16+Math.random()*16}px;transition:all .9s ease-out;opacity:1`;fx.appendChild(h);
+  requestAnimationFrame(()=>{const a=Math.random()*Math.PI*2,r=70+Math.random()*110;h.style.transform=`translate(${Math.cos(a)*r}px,${Math.sin(a)*r}px) scale(.4)`;h.style.opacity="0"});
+  setTimeout(()=>h.remove(),1000)}}
+let lastTrail=0;
+function trail(x,y){const n=Date.now();if(n-lastTrail<70)return;lastTrail=n;const s=document.createElement("span");s.className="trail";
+  s.textContent=["💗","✨","💕"][Math.floor(Math.random()*3)];s.style.left=x+"px";s.style.top=y+"px";fx.appendChild(s);setTimeout(()=>s.remove(),900)}
+window.addEventListener("mousemove",e=>trail(e.clientX,e.clientY));
+window.addEventListener("touchmove",e=>{const t=e.touches[0];if(t)trail(t.clientX,t.clientY)},{passive:true});
+
+/* ================= Music ================= */
+let audio=null,musicOn=false;
+if(CONFIG.MUSIC_URL){audio=new Audio(CONFIG.MUSIC_URL);audio.loop=true;audio.volume=.6;$("music").style.display="inline-block"}
+function setMusic(on){if(!audio)return;musicOn=on;$("music").textContent=on?"🎵":"🔇";if(on)audio.play().catch(()=>{});else audio.pause()}
+$("music").onclick=()=>setMusic(!musicOn);
+
+/* ================= Navigation ================= */
+function go(id){const from=$(current),to=$(id);from.classList.add("leave");from.classList.remove("active");
+  setTimeout(()=>{from.classList.remove("leave");from.style.display="";to.classList.add("active");window.scrollTo(0,0)},350);
+  current=id;document.querySelectorAll("#dots i").forEach((d,i)=>d.classList.toggle("on",i===+id[1]-1))}
+
+/* ================= NO button ================= */
+const noBtn=$("noBtn"),yesBtn=$("yesBtn");
+let settled=false;
+function decline(){
+  $("btnRow").style.display="none";$("noHint").style.display="none";
+  const b=$("declineBox");b.textContent=T[lang].decline;b.style.display="block";
+  send("💛 "+(CONFIG.HER_NAME||"She")+" chose NO","She said no after "+state.noClicks+" button dodges. Stay kind and friendly, thank her for being honest.");
+}
+function dodge(e){
+  const L=T[lang];
+  if(settled){if(e&&e.type==="click")decline();return}
+  if(e){e.preventDefault();e.stopPropagation()}
+  state.noClicks++;
+  if(state.noClicks>=CONFIG.NO_DODGES){
+    settled=true;noBtn.classList.remove("run");noBtn.style.left="";noBtn.style.top="";
+    noBtn.textContent=L.noFinal;yesBtn.style.transform="";$("noHint").textContent="";return;
+  }
+  noBtn.textContent=L.noT[state.noClicks%L.noT.length];noBtn.classList.add("run","moved");$("noHint").textContent=L.noHint(state.noClicks);
+  const vw=innerWidth,vh=innerHeight,pad=12,w=noBtn.offsetWidth,h=noBtn.offsetHeight,yr=yesBtn.getBoundingClientRect();
+  let x,y,t=0;
+  do{x=pad+Math.random()*Math.max(1,vw-w-pad*2);y=pad+60+Math.random()*Math.max(1,vh-h-pad*2-60);t++}
+  while(t<40&&x<yr.right+16&&x+w>yr.left-16&&y<yr.bottom+16&&y+h>yr.top-16);
+  noBtn.style.left=x+"px";noBtn.style.top=y+"px";
+  yesBtn.style.transform="scale("+Math.min(1.6,1+state.noClicks*.06)+")";
+}
+["mouseenter","touchstart","pointerdown","click","focus"].forEach(ev=>noBtn.addEventListener(ev,dodge,{passive:false}));
+addEventListener("resize",()=>{if(!noBtn.classList.contains("run"))return;const r=noBtn.getBoundingClientRect();
+  if(r.right>innerWidth||r.bottom>innerHeight||r.left<0||r.top<0)dodge()});
+
+/* ================= YES ================= */
+yesBtn.addEventListener("click",()=>{
+  const r=yesBtn.getBoundingClientRect();burstAt(r.left+r.width/2,r.top+r.height/2);rain(["💖","💗","💕","🌸"],35,1800);
+  noBtn.style.display="none";setMusic(true);
+  if(CONFIG.NOTIFY_ON_YES)send("💖 She clicked YES!","She just clicked YES! (NO-button attempts: "+state.noClicks+" 😂) She's choosing the details now...");
+  setTimeout(()=>go("p2"),1300);
+},{once:true});
+
+/* ================= Page 2 ================= */
+const di=$("dateInput");const tm=new Date();tm.setDate(tm.getDate()+1);
+di.min=tm.getFullYear()+"-"+String(tm.getMonth()+1).padStart(2,"0")+"-"+String(tm.getDate()).padStart(2,"0");
+function chipGroup(id,key){$(id).addEventListener("click",e=>{const c=e.target.closest(".chip");if(!c)return;
+  [...$(id).children].forEach(x=>x.classList.remove("sel"));c.classList.add("sel");state[key]=c.dataset.v})}
+chipGroup("timeChips","time");chipGroup("placeChips","place");
+$("meter").addEventListener("input",e=>{state.excitement=+e.target.value;const s=$("meterE");s.textContent=T[lang].meter[e.target.value-1];
+  s.style.transform="scale("+(1+e.target.value*.04)+")"});
+$("back2").onclick=()=>go("p1");
+$("next2").onclick=()=>{const L=T[lang];state.date=di.value;state.exact=$("exactTime").value;
+  if(!state.date)return $("err2").textContent=L.errDate;
+  if(!state.time&&!state.exact)return $("err2").textContent=L.errTime;
+  if(!state.place)return $("err2").textContent=L.errPlace;
+  $("err2").textContent="";go("p3")};
+
+/* ================= Page 3 ================= */
+const fw=$("foods");
+FOODS.forEach(([e,n],i)=>{const d=document.createElement("div");d.className="food";d.dataset.v=e+" "+n;
+  d.innerHTML=`<span class="e">${e}</span><span class="t2"></span>`;
+  d.onclick=()=>{d.classList.toggle("sel");state.foods=[...fw.querySelectorAll(".food.sel")].map(x=>x.dataset.v)};fw.appendChild(d)});
+$("back3").onclick=()=>go("p2");
+$("next3").onclick=()=>{if(!state.foods.length)return $("err3").textContent=T[lang].errFood;
+  state.extra=$("extra").value.trim();$("err3").textContent="";fillSummary();go("p4");
+  setTimeout(()=>{celebrate();typeMsg();startCountdown();buildGallery()},450);
+  setInterval(()=>{if(current==="p4")rain(["💖","🌸","🌷","💗"],6,2000)},4000);
+  sendFinal()};
+function celebrate(){rain(["💖","💗","🌸","🌷","🌹","💕"],70,5000);confetti(90)}
+$("againBtn").onclick=celebrate;
+
+/* ================= Page 4 helpers ================= */
+function timeLabel(){const L=T[lang];const base=state.time?(state.time.replace(/[^A-Za-z]/g,"")?L[{Morning:"morning",Afternoon:"afternoon",Evening:"evening",Night:"night"}[state.time.split(" ")[0]]]:state.time):"";
+  return [base,state.exact].filter(Boolean).join(" · ")}
+function fillSummary(){
+  const L=T[lang];const d=new Date(state.date+"T00:00:00");
+  $("sDate").textContent=d.toLocaleDateString(lang==="bn"?"bn-BD":undefined,{weekday:"long",year:"numeric",month:"long",day:"numeric"});
+  $("sTime").textContent=timeLabel();
+  const placeKey={"Coffee Shop":"coffeeshop","Restaurant":"restaurant","Park":"park","Shopping Mall":"mall","Surprise me":"special"}[state.place.replace(/\s*[^\w\s].*$/,"").trim()];
+  $("sPlace").textContent=placeKey?L[placeKey]:state.place;
+  $("sFood").textContent=state.foods.map(f=>{const i=FOODS.findIndex(x=>x[0]+" "+x[1]===f);return i>=0?FOODS[i][0]+" "+L.food[i]:f}).join(", ");
+  if(state.extra){$("sExtra").textContent=state.extra;$("sExtraWrap").style.display="block"}
+}
+let typeTimer=null;
+function typeMsg(){if(typedOnce)return;typedOnce=true;clearInterval(typeTimer);
+  const txt=CONFIG.PERSONAL_NOTE||T[lang].msg,el=$("typed");el.textContent="";let i=0;
+  typeTimer=setInterval(()=>{el.textContent=txt.slice(0,++i);if(i>=txt.length)clearInterval(typeTimer)},35)}
+function targetDate(){const d=new Date(state.date+"T00:00:00");
+  if(state.exact){const[h,m]=state.exact.split(":");d.setHours(+h,+m)}
+  else{const base=state.time||"";d.setHours(base.startsWith("Morning")?10:base.startsWith("Afternoon")?15:base.startsWith("Evening")?18:20,0)}
+  return d}
+function startCountdown(){clearInterval(cdTimer);const t=targetDate();
+  const tick=()=>{let s=Math.max(0,Math.floor((t-new Date())/1000));
+    $("cD").textContent=Math.floor(s/86400);$("cH").textContent=Math.floor(s%86400/3600);$("cM").textContent=Math.floor(s%3600/60);$("cS").textContent=s%60};
+  tick();cdTimer=setInterval(tick,1000)}
+function buildGallery(){const g=$("gallery");if(!CONFIG.PHOTOS.length||g.childNodes.length)return;g.style.display="block";
+  CONFIG.PHOTOS.forEach((src,i)=>{const im=document.createElement("img");im.src=src;if(!i)im.className="on";g.appendChild(im)});
+  if(CONFIG.PHOTOS.length>1){let k=0;setInterval(()=>{const im=g.querySelectorAll("img");im[k].classList.remove("on");k=(k+1)%im.length;im[k].classList.add("on")},3000)}}
+
+/* Add to calendar (.ics) */
+$("calBtn").onclick=()=>{
+  const s=targetDate(),e=new Date(s.getTime()+2*3600*1000);
+  const f=d=>d.getFullYear()+String(d.getMonth()+1).padStart(2,"0")+String(d.getDate()).padStart(2,"0")+"T"+String(d.getHours()).padStart(2,"0")+String(d.getMinutes()).padStart(2,"0")+"00";
+  const ics=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Our Date//EN","BEGIN:VEVENT","UID:date-"+Date.now()+"@ourdate",
+    "DTSTAMP:"+f(new Date()),"DTSTART:"+f(s),"DTEND:"+f(e),"SUMMARY:Our Date 💖",
+    "DESCRIPTION:"+("Place: "+state.place+"\\nFood: "+state.foods.join(", ")).replace(/,/g,"\\,"),"BEGIN:VALARM","TRIGGER:-PT2H","ACTION:DISPLAY","DESCRIPTION:Date time soon!","END:VALARM","END:VEVENT","END:VCALENDAR"].join("\r\n");
+  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([ics],{type:"text/calendar"}));a.download="our-date.ics";a.click()};
+
+/* ================= Delivering answers to YOU ================= */
+async function send(subject,text){
+  const sent=[];
+  if(CONFIG.WEB3FORMS_KEY)sent.push(fetch("https://api.web3forms.com/submit",{method:"POST",headers:{"Content-Type":"application/json",Accept:"application/json"},
+      body:JSON.stringify({access_key:CONFIG.WEB3FORMS_KEY,subject,message:text})}).then(r=>r.json()).then(j=>!!j.success).catch(()=>false));
+  if(CONFIG.TELEGRAM_BOT_TOKEN&&CONFIG.TELEGRAM_CHAT_ID)sent.push(fetch("https://api.telegram.org/bot"+CONFIG.TELEGRAM_BOT_TOKEN+"/sendMessage",{method:"POST",
+      headers:{"Content-Type":"application/json"},body:JSON.stringify({chat_id:CONFIG.TELEGRAM_CHAT_ID,text:subject+"\n\n"+text})}).then(r=>r.ok).catch(()=>false));
+  if(!sent.length)return null;
+  const res=await Promise.all(sent);return res.some(Boolean);
+}
+function report(){
+  const nice=state.date?new Date(state.date+"T00:00:00").toDateString():"-";
+  return `📅 Date: ${nice}\n⏰ Time: ${state.time||"-"}${state.exact?" ("+state.exact+")":""}\n📍 Place: ${state.place}\n🍕 Food: ${state.foods.join(", ")}\n💗 Extra: ${state.extra||"-"}\n💓 Excitement: ${state.excitement}/10\n😂 NO-button attempts: ${state.noClicks}`;
+}
+async function sendFinal(){
+  const msg=report();try{localStorage.setItem("dateAnswers",JSON.stringify(state))}catch(e){}
+  const st=$("status");
+  if(CONFIG.WEB3FORMS_KEY||(CONFIG.TELEGRAM_BOT_TOKEN&&CONFIG.TELEGRAM_CHAT_ID)){
+    st.textContent=T[lang].sending;
+    let ok=await send("💖 SHE SAID YES — her date plan is ready!",msg);
+    if(!ok){await new Promise(r=>setTimeout(r,2500));ok=await send("💖 SHE SAID YES — her date plan is ready!",msg)}
+    st.textContent=ok?T[lang].sent:"";
+  }
+  if(CONFIG.WHATSAPP_NUMBER)$("waWrap").innerHTML=`<a class="wa" target="_blank" rel="noopener" href="https://wa.me/${CONFIG.WHATSAPP_NUMBER}?text=${encodeURIComponent("💖 SHE SAID YES! 💖\n\n"+msg)}">${T[lang].wa}</a>`;
+}
+if(CONFIG.NOTIFY_ON_OPEN)send("👀 She opened your link!","She just opened the date invitation. Fingers crossed 🤞");
+
+/* ================= Init ================= */
+applyLang();
+</script>
+</body>
+</html>
